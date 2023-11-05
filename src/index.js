@@ -15,17 +15,32 @@ const refs = {
 refs.selectEl.classList.add("visually-hidden");
 refs.error.classList.add("visually-hidden");
 
-// Функція для показу лоадера та приховання вибору породи
-function showLoader() {
+// Функція для приховання вибору породи та показу лоадера
+function showLoaderForBreeds() {
     refs.loader.classList.remove("visually-hidden");
     refs.selectEl.classList.add("visually-hidden");
     refs.error.classList.add("visually-hidden");
 }
 
 // Функція для приховання лоадера та відображення вибору породи
-function hideLoader() {
+function hideLoaderForBreeds() {
     refs.loader.classList.add("visually-hidden");
     refs.selectEl.classList.remove("visually-hidden");
+    refs.error.classList.add("visually-hidden");
+}
+
+// Функція для приховання інформації про кота та показу лоадера
+function showLoaderForCat() {
+    refs.loader.classList.remove("visually-hidden");
+    refs.catInfo.classList.add("visually-hidden");
+    refs.error.classList.add("visually-hidden");
+}
+
+// Функція для приховання лоадера та відображення інформації про кота
+function hideLoaderForCat() {
+    refs.loader.classList.add("visually-hidden");
+    refs.catInfo.classList.remove("visually-hidden");
+    refs.error.classList.add("visually-hidden");
 }
 
 fetchBreeds()
@@ -36,17 +51,17 @@ fetchBreeds()
             select: '#selectElement'
         })
 
-        hideLoader(); // Приховуємо лоадер після завершення запиту
+        hideLoaderForBreeds(); // Приховуємо лоадер після завершення запиту за списком порід
     })
     .catch(error => {
         Notify.failure(`❌ Oops!, Something went wrong! Try reloading the page!`);
-        hideLoader(); // Приховуємо лоадер при помилці запиту
+        hideLoaderForBreeds(); // Приховуємо лоадер при помилці запиту за списком порід
     });
 
 refs.selectEl.addEventListener('change', onSelectHandler);
 
 function onSelectHandler(event) {
-    showLoader(); // Показуємо лоадер під час вибору породи
+    showLoaderForCat(); // Показуємо лоадер під час вибору породи
     refs.catInfo.classList.add("visually-hidden");
     refs.error.classList.add("visually-hidden");
 
@@ -63,12 +78,12 @@ function onSelectHandler(event) {
             
             const catMarkup = makeCatCardMarkup(name, url, temperament, description);
             refs.catInfo.innerHTML = catMarkup;
-            hideLoader(); // Приховуємо лоадер після завершення запиту
+            hideLoaderForCat(); // Приховуємо лоадер після завершення запиту про кота
             refs.catInfo.classList.remove("visually-hidden");
         })
         .catch(error => {
             Notify.failure(`❌ Oops!, Something went wrong! Try reloading the page!`);
-            hideLoader(); // Приховуємо лоадер при помилці запиту
+            hideLoaderForCat(); // Приховуємо лоадер при помилці запиту про кота
             refs.catInfo.classList.add("visually-hidden");
         });   
 }
