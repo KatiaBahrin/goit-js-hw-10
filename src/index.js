@@ -9,7 +9,7 @@ const wrapperLoaderEl = document.querySelector('.wrapper-loader');
 
 function onLoad() {
   selectEl.style.display = 'none';
-  wrapperLoaderEl.style.display = 'block';
+  
 
   wrapperLoaderEl.classList.remove('is-hidden');
   fetchBreeds().then(res => {
@@ -21,7 +21,7 @@ function onLoad() {
   }).catch(onError).finally(() => {
     console.log('finally')
     wrapperLoaderEl.classList.add('is-hidden');
-    selectEl.style.display = 'block';
+  
     wrapperLoaderEl.style.display = 'none';
   })
 }
@@ -42,7 +42,6 @@ selectEl.addEventListener('change', onChange);
 
 function onChange(evt) {
   selectEl.style.display = 'none';
-  wrapperLoaderEl.style.display = 'block';
 
   wrapperLoaderEl.classList.remove('is-hidden');
   fetchCatByBreed(evt.target.value)
@@ -53,7 +52,6 @@ function onChange(evt) {
       addMarkup(infoEl, markup)
   })
     .catch(onError).finally(() => {
-      selectEl.style.display = 'block';
       wrapperLoaderEl.style.display = 'none';
 
     wrapperLoaderEl.classList.add('is-hidden');
