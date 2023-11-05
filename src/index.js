@@ -1,4 +1,3 @@
-
 import SlimSelect from 'slim-select'
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { fetchBreeds, fetchCatByBreed } from './cat-api.js'
@@ -8,17 +7,22 @@ const infoEl = document.querySelector('.cat-info');
 const wrapperLoaderEl = document.querySelector('.wrapper-loader');
 
 function onLoad() {
-  wrapperLoaderEl.classList.remove('is-hidden');
+
+  selectEl.style.display = 'none';
+  wrapperLoaderEl.style.display = 'block';
+
   fetchBreeds().then(res => {
     const markup = createOptions(res);
     addMarkup(selectEl, markup);
     new SlimSelect({
-  select: selectEl,
-})
+      select: selectEl,
+    });
   }).catch(onError).finally(() => {
-    console.log('finally')
-    wrapperLoaderEl.classList.add('is-hidden');
-  })
+    console.log('finally');
+   
+    selectEl.style.display = 'block';
+    wrapperLoaderEl.style.display = 'none';
+  });
 }
 
 onLoad();
@@ -36,29 +40,33 @@ function addMarkup(el, markup = '') {
 selectEl.addEventListener('change', onChange);
 
 function onChange(evt) {
-  wrapperLoaderEl.classList.remove('is-hidden');
+  
+  selectEl.style.display = 'none';
+  wrapperLoaderEl.style.display = 'block';
+
   fetchCatByBreed(evt.target.value)
     .then(([res]) => {
       const { url, breeds } = res;
-      const [{name, description, temperament}] = breeds;
+      const [{ name, description, temperament }] = breeds;
       const markup = createBoxInfo({ url, name, description, temperament });
-      addMarkup(infoEl, markup)
-  })
+      addMarkup(infoEl, markup);
+    })
     .catch(onError).finally(() => {
-
-    wrapperLoaderEl.classList.add('is-hidden');
-  })
+    
+      selectEl.style.display = 'block';
+      wrapperLoaderEl.style.display = 'none';
+    });
 }
 
-function createBoxInfo({url, name, description, temperament}) {
+function createBoxInfo({ url, name, description, temperament }) {
   return `<div class="left-col">
           <img src="${url}" alt="" />
         </div>
-<div class="right-col">
+        <div class="right-col">
           <h1>${name}</h1>
           <p><strong>Temperament:</strong> ${temperament}</p>
           <p><strong>Description:</strong> ${description}</p>
-        </div>`
+        </div>`;
 }
 
 function onError() {
