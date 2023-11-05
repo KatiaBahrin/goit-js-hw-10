@@ -1,5 +1,6 @@
 .content {
-	width: 400px;
+	width: 1000px;
+	margin-inline: auto;
 }
 .cat-info {
 	width: 100%;
