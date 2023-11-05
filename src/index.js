@@ -1,64 +1,66 @@
-import SlimSelect from 'slim-select';
-import "../node_modules/slim-select/dist/slimselect.css";
+
+import SlimSelect from 'slim-select'
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import { fetchBreeds, fetchCatByBreed } from "./cat-api.js";
-import { makeMarkupforSelect } from "./services/makeMarkupforSelect";
-import {  makeCatCardMarkup } from "./services/makeCatCardMarkup";
+import { fetchBreeds, fetchCatByBreed } from './cat-api.js'
 
-const refs = {
-    catInfo: document.querySelector('.cat-info'),
-    loader: document.querySelector('.loader'),
-    error: document.querySelector('.error'),
-    selectEl: document.querySelector('.breed-select'),
-};
+const selectEl = document.querySelector('.breed-select');
+const infoEl = document.querySelector('.cat-info');
+const wrapperLoaderEl = document.querySelector('.wrapper-loader');
 
-refs.selectEl.classList.add("visually-hidden");
-refs.error.classList.add("visually-hidden");
+function onLoad() {
+  wrapperLoaderEl.classList.remove('is-hidden');
+  fetchBreeds().then(res => {
+    const markup = createOptions(res);
+    addMarkup(selectEl, markup);
+    new SlimSelect({
+  select: selectEl,
+})
+  }).catch(onError).finally(() => {
+    console.log('finally')
+    wrapperLoaderEl.classList.add('is-hidden');
+  })
+}
 
-    fetchBreeds()
-        .then(data => {
-            const markup = makeMarkupforSelect(data);
-            refs.selectEl.innerHTML = markup;
-             new SlimSelect({
-             select: '#selectElement'
-            })
+onLoad();
 
-            refs.loader.classList.add("visually-hidden");
-            refs.selectEl.classList.remove("visually-hidden");;
-        })
-        .catch(error => {
-            // console.log(error);
-            Notify.failure(`❌ Oops!, Something went wrong! Try reloading the page!`);
-        });
-    
+function createOptions(items = []) {
+  return items
+    .map(({ name, id }) => `<option value="${id}">${name}</option>`)
+    .join('');
+}
 
-refs.selectEl.addEventListener('change', onSelectHandler);
+function addMarkup(el, markup = '') {
+  el.innerHTML = markup;
+}
 
-function onSelectHandler(event) {
-    refs.catInfo.classList.add("visually-hidden");
-    refs.loader.classList.remove("visually-hidden");;
-    refs.error.classList.add("visually-hidden");;
+selectEl.addEventListener('change', onChange);
 
-    const selectedBreedId = event.currentTarget.value;
+function onChange(evt) {
+  wrapperLoaderEl.classList.remove('is-hidden');
+  fetchCatByBreed(evt.target.value)
+    .then(([res]) => {
+      const { url, breeds } = res;
+      const [{name, description, temperament}] = breeds;
+      const markup = createBoxInfo({ url, name, description, temperament });
+      addMarkup(infoEl, markup)
+  })
+    .catch(onError).finally(() => {
 
-    fetchCatByBreed(selectedBreedId)
-        .then(result => {
-            console.log(result.data);
-            
-            const name = result.data[0].breeds[0].name;
-            const url = result.data[0].url;
-            const temperament = result.data[0].breeds[0].temperament;
-            const description = result.data[0].breeds[0].description;
-            
-            const catMarkup = makeCatCardMarkup(name, url, temperament, description);
-            refs.catInfo.innerHTML = catMarkup;
-            refs.loader.classList.add("visually-hidden");;
-            refs.catInfo.classList.remove("visually-hidden");
-        })
-        .catch(error => {
-            // console.log(error);
-            Notify.failure(`❌ Oops!, Something went wrong! Try reloading the page!`);
-            refs.loader.classList.add("visually-hidden");;
-            refs.catInfo.classList.add("visually-hidden");
-        });   
+    wrapperLoaderEl.classList.add('is-hidden');
+  })
+}
+
+function createBoxInfo({url, name, description, temperament}) {
+  return `<div class="left-col">
+          <img src="${url}" alt="" />
+        </div>
+<div class="right-col">
+          <h1>${name}</h1>
+          <p><strong>Temperament:</strong> ${temperament}</p>
+          <p><strong>Description:</strong> ${description}</p>
+        </div>`
+}
+
+function onError() {
+  Notify.failure('Oops! Something went wrong! Try reloading the page!');
 }
